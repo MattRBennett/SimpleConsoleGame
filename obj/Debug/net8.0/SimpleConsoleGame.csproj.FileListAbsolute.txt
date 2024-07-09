@@ -1,0 +1,14 @@
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\bin\Debug\net8.0\SimpleConsoleGame.exe
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\bin\Debug\net8.0\SimpleConsoleGame.deps.json
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\bin\Debug\net8.0\SimpleConsoleGame.runtimeconfig.json
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\bin\Debug\net8.0\SimpleConsoleGame.dll
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\bin\Debug\net8.0\SimpleConsoleGame.pdb
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\SimpleConsoleGame.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\SimpleConsoleGame.AssemblyInfoInputs.cache
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\SimpleConsoleGame.AssemblyInfo.cs
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\SimpleConsoleGame.csproj.CoreCompileInputs.cache
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\SimpleConsoleGame.dll
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\refint\SimpleConsoleGame.dll
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\SimpleConsoleGame.pdb
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\SimpleConsoleGame.genruntimeconfig.cache
+C:\Users\Matthew-LT\source\repos\SimpleConsoleGame\obj\Debug\net8.0\ref\SimpleConsoleGame.dll
