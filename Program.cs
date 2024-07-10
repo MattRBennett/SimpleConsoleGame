@@ -115,7 +115,7 @@ class Program
             Console.WriteLine("Welcome to the game, what is your name?");
             var playersname = Console.ReadLine();
 
-            if (playersname != null)
+            if (!string.IsNullOrWhiteSpace(playersname))
             {
                 player.CreatePlayer(playersname);
 
@@ -140,34 +140,34 @@ class Program
                                 player.SetSpeciality(Speciality.Archer);
                                 break;
                             default:
-                                Console.WriteLine("Unknown class!");
+                                Console.WriteLine("Invalid input, please try again!");
                                 break;
                         }
+
+                        int Rounds = 1;
+
+                        while (Rounds < 11)
+                        {
+                            Monster monster = new Monster().GenerateMonster();
+                            Console.WriteLine($"Game continues - Round {Rounds}");
+                            
+                                monster.GenerateMonster();
+                                Console.WriteLine("A monster appears!");
+                                Thread.Sleep(1000);
+                                monster.MonsterStats();
+                            var input = Console.ReadLine();
+                            if (input is not null)
+                            {
+                                Rounds++;
+                            }
+                        }
+
+                        break;
                     }
                     else
                     {
-                        Console.WriteLine("Invalid class!");
+                        Console.WriteLine("Invalid input, please try again!");
                     }
-
-                    int Rounds = 1;
-
-                    while (Rounds < 11)
-                    {
-                        Monster monster = new Monster().GenerateMonster();
-                        Console.WriteLine($"Game continues - Round {Rounds}");
-                        var input = Console.ReadLine();
-                        if (input is not null)
-                        {
-                            monster.GenerateMonster();
-                            Console.WriteLine("A monster appears!");
-                            Thread.Sleep(1000);
-                            monster.MonsterStats();
-
-                            Rounds++;
-                        }                     
-                    }
-
-                    break;
                 }
 
                 Console.WriteLine("Congratulations! You have completed the game, until we meet again warrior!");
@@ -177,7 +177,6 @@ class Program
             else
             {
                 Console.WriteLine("Invalid Name!");
-
             }
         }
     }
