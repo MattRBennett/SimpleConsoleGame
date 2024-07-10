@@ -9,20 +9,31 @@ class Program
         Knight = 2,
         Archer = 3
     }
+
+    public class PlayerInventory
+    {
+        public int Id { get; set; } = 0;
+        public string ItemName { get; set; } = string.Empty;
+        //public int ItemQuantity { get; set; } = 0;
+        public string ItemType { get; set; } = string.Empty;
+        
+    }
     public class Player
     {
         public string Name { get; set; } = string.Empty;
         public int Health { get; set; } = 20;
         public int Strength { get; set; } = 0;
         public int Defense { get; set; } = 0;
-        public Speciality PlayersSpeciality {  get; set; } = Speciality.Rogue;
+        public Speciality PlayersSpeciality { get; set; } = Speciality.Rogue;
+        public List<PlayerInventory>? playerInventory { get; set; }
 
-        public void CreatePlayer (string name)
+
+        public void CreatePlayer(string name)
         {
             Name = name;
         }
 
-        public void SetSpeciality (Speciality speciality)
+        public void SetSpeciality(Speciality speciality)
         {
             PlayersSpeciality = speciality;
 
@@ -46,6 +57,62 @@ class Program
             }
 
             Console.WriteLine($"{speciality} Selected!");
+        }
+
+        public void AddItem(string ItemName, string ItemType)
+        {
+            int TotalItems = playerInventory.Count;
+
+            PlayerInventory NewItem = new PlayerInventory{
+                Id = TotalItems++,
+                ItemName = ItemName,
+                ItemType = ItemType
+            };
+
+            playerInventory.Add(NewItem);
+
+            Console.WriteLine($"{ItemName} has been added to your inventory!");
+        }
+
+        public void UseItem(int Id)
+        {
+            var ItemInInventory = playerInventory.FirstOrDefault(x => x.Id == Id);
+
+            if (ItemInInventory is not null)
+            {
+                if (ItemInInventory.ItemType == "Potion")
+                {
+                    switch (ItemInInventory.ItemName)
+                    {
+                        case "Health":
+                            Health = 20;
+                            Console.WriteLine("Health has been restored!");
+                            
+                            break;
+                        case "Strength":
+                            Strength += 5;
+                            Console.WriteLine("Strengh has been inreased by 5!");
+                            break;
+                        case "Defense":
+                            Defense += 5;
+                            Console.WriteLine("Defense has been increased by 5!");
+                            break;
+                        default : Console.WriteLine("Cannot use item!");
+                            break;
+                    }
+
+                    playerInventory.Remove(ItemInInventory);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown item!");
+                }
+
+            }
+            else
+            {
+                Console.WriteLine("Cannot find item in inventory!");
+            }
         }
 
         public void DisplayPlayerStats()
@@ -93,6 +160,8 @@ class Program
             return monster;
         }
 
+        
+
         public void MonsterStats()
         {
             Console.WriteLine($"Monsters type is {monstertype}");
@@ -104,6 +173,55 @@ class Program
             Console.WriteLine($"Monsters defense is {Defense}");
         }
 
+    }
+
+    public enum PotionType
+    {
+        Health = 1,
+        Strength = 2,
+        Defense = 3
+    }
+
+    public class Potions
+    {
+        public PotionType potionType { get; set; } = PotionType.Health;
+
+        public PotionType GeneratePotion()
+        {
+            Random rand = new Random();
+            
+            Array PotionArray = Enum.GetValues(typeof(PotionType));
+
+            return (PotionType)PotionArray.GetValue(rand.Next(PotionArray.Length));
+        }
+
+        public bool PotionDrop()
+        {
+            Random random = new Random();
+            int WillPotionDrop = random.Next(1, 100);
+
+            if (WillPotionDrop > 75)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //public void UsePotion(PotionType ChosenPotion)
+        //{
+        //    potionType = ChosenPotion;
+
+        //    switch (potionType) {
+        //        case PotionType.Health:
+
+        //    }
+
+            
+        //}
+        
     }
 
     static void Main(string[] args)
@@ -149,12 +267,13 @@ class Program
                         while (Rounds < 11)
                         {
                             Monster monster = new Monster().GenerateMonster();
-                            Console.WriteLine($"Game continues - Round {Rounds}");
-                            
-                                monster.GenerateMonster();
-                                Console.WriteLine("A monster appears!");
-                                Thread.Sleep(1000);
-                                monster.MonsterStats();
+                            Console.WriteLine($"GET READY! - Round {Rounds}");
+                            Thread.Sleep(1000);
+                            monster.GenerateMonster();
+                            Console.WriteLine("A monster appears!");
+                            Thread.Sleep(1000);
+                            monster.MonsterStats();
+
                             var input = Console.ReadLine();
                             if (input is not null)
                             {
