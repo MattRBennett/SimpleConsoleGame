@@ -15,7 +15,6 @@ class Program
         public int Health { get; set; } = 20;
         public int Strength { get; set; } = 0;
         public int Defense { get; set; } = 0;
-        //public int Range { get; set; } = 0;
         public Speciality PlayersSpeciality {  get; set; } = Speciality.Rogue;
 
         public void CreatePlayer (string name)
@@ -33,32 +32,33 @@ class Program
                 case Speciality.Rogue:
                     Strength = 7;
                     Defense = 6;
-                    //Range = 1;
                     break;
                 case Speciality.Knight:
                     Strength = 10;
                     Defense = 8;
-                    //Range = 2;
                     break;
                 case Speciality.Archer:
                     Strength = 7;
                     Defense = 4;
-                    //Range = 3;
                     break;
                 default:
                     throw new Exception("Speciality unknown.");
             }
 
-            
             Console.WriteLine($"{speciality} Selected!");
+        }
+
+        public void DisplayPlayerStats()
+        {
+            Console.WriteLine($"Name: {Name}");
             Thread.Sleep(1000);
-            Console.WriteLine($"Your health is {Health}");
+            Console.WriteLine($"Class: {PlayersSpeciality}");
             Thread.Sleep(1000);
-            Console.WriteLine($"Your attack is {Strength}");
+            Console.WriteLine($"Health: {Health}");
             Thread.Sleep(1000);
-            Console.WriteLine($"Your defense is {Defense}");
-            //Thread.Sleep(1000);
-            //Console.WriteLine($"Your range is {Range}");
+            Console.WriteLine($"Strength: {Strength}");
+            Thread.Sleep(1000);
+            Console.WriteLine($"Defense: {Defense}");
         }
     }
 
@@ -78,14 +78,30 @@ class Program
         public int Health { get; set; } = 0;
         public int Strength { get; set; } = 0;
         public int Defense { get; set; } = 0;
-        //public int Range { get; set; } = 0;
 
-        public void GenerateMonster()
+        public Monster GenerateMonster()
         {
             Monster monster = new Monster();
-
             Random rand = new Random();
+            Array monsterArray = Enum.GetValues(typeof(MonsterType));
 
+            monster.monstertype = (MonsterType)monsterArray.GetValue(rand.Next(monsterArray.Length));
+            monster.Health = rand.Next(1, 15);
+            monster.Defense = rand.Next(1, 10);
+            monster.Strength = rand.Next(1, 10);
+
+            return monster;
+        }
+
+        public void MonsterStats()
+        {
+            Console.WriteLine($"Monsters type is {monstertype}");
+            Thread.Sleep(1000);
+            Console.WriteLine($"Monsters health is {Health}");
+            Thread.Sleep(1000);
+            Console.WriteLine($"Monsters strength is {Strength}");
+            Thread.Sleep(1000);
+            Console.WriteLine($"Monsters defense is {Defense}");
         }
 
     }
@@ -127,13 +143,36 @@ class Program
                                 Console.WriteLine("Unknown class!");
                                 break;
                         }
-                        break;
                     }
                     else
                     {
                         Console.WriteLine("Invalid class!");
                     }
+
+                    int Rounds = 1;
+
+                    while (Rounds < 11)
+                    {
+                        Monster monster = new Monster().GenerateMonster();
+                        Console.WriteLine($"Game continues - Round {Rounds}");
+                        var input = Console.ReadLine();
+                        if (input is not null)
+                        {
+                            monster.GenerateMonster();
+                            Console.WriteLine("A monster appears!");
+                            Thread.Sleep(1000);
+                            monster.MonsterStats();
+
+                            Rounds++;
+                        }                     
+                    }
+
+                    break;
                 }
+
+                Console.WriteLine("Congratulations! You have completed the game, until we meet again warrior!");
+                Thread.Sleep(2000);
+                break;
             }
             else
             {
