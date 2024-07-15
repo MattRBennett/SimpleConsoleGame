@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using static Program;
 
 class Program
@@ -25,7 +26,7 @@ class Program
         public Speciality PlayersSpeciality { get; set; } = Speciality.Rogue;
         public List<PlayerInventory> playerInventory { get; set; } = new List<PlayerInventory>();
 
-        public void CreatePlayer(string name)
+        public void SetPlayerName(string name)
         {
             Name = name;
         }
@@ -51,17 +52,15 @@ class Program
                 default:
                     throw new Exception("Speciality unknown.");
             }
-
-            Console.WriteLine($"{speciality} Selected!");
         }
 
         public void AddItem(string ItemName, string ItemType)
         {
-            int TotalItems = playerInventory.Count;
+            int TotalItems = playerInventory.Count + 1;
 
             PlayerInventory NewItem = new PlayerInventory
             {
-                Id = TotalItems++,
+                Id = TotalItems,
                 ItemName = ItemName,
                 ItemType = ItemType
             };
@@ -84,18 +83,21 @@ class Program
                         case "Health":
                             Health = 30;
                             Console.WriteLine("Health has been restored!");
-
+                            Thread.Sleep(3000);
                             break;
                         case "Strength":
                             Strength += 5;
                             Console.WriteLine("Strengh has been inreased by 5!");
+                            Thread.Sleep(3000);
                             break;
                         case "Defense":
                             Defense += 5;
                             Console.WriteLine("Defense has been increased by 5!");
+                            Thread.Sleep(3000);
                             break;
                         default:
                             Console.WriteLine("Cannot use item!");
+                            Thread.Sleep(3000);
                             break;
                     }
 
@@ -159,6 +161,83 @@ class Program
         {
             Console.WriteLine($"Health: {Health}");
         }
+
+        public void ChooseClass(Player player, string ClassName)
+        {
+            switch (ClassName)
+            {
+                case "rogue":
+                    player.SetSpeciality(Speciality.Rogue);
+                    break;
+                case "knight":
+                    player.SetSpeciality(Speciality.Knight);
+                    break;
+                case "archer":
+                    player.SetSpeciality(Speciality.Archer);
+                    break;
+                default:
+                    Console.WriteLine("Invalid input, please try again!");
+                    break;
+            }
+
+            Console.WriteLine($"You have chosen {player.PlayersSpeciality}!");
+            Thread.Sleep(2000);
+        }
+
+        public void PlayerAttack(Player player, Monster monster)
+        {
+            int MonstersOriginalHealth = monster.Health;
+
+            bool DidPlayerDamageTarget = player.AttackChance();
+
+            if (DidPlayerDamageTarget == true)
+            {
+                int DamageGiven = monster.Defense - player.Strength;
+
+                if (DamageGiven < 0)
+                {
+                    monster.Health += DamageGiven;
+
+                    int FinalCalculation = MonstersOriginalHealth -= monster.Health;
+
+                    Console.WriteLine($"You dealt the {monster.monstertype} {FinalCalculation} damage and is now at {monster.Health} health.");
+
+                    Thread.Sleep(2000);
+                }
+                else
+                {
+                    Console.WriteLine("The attack was ineffective, and no damage was inflicted.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("You missed!");
+            }
+        }
+
+        public bool PlayerRun(Player player, Monster monster)
+        {
+            Random random = new Random();
+
+            int PlayersOriginalHealth = player.Health;
+            bool WillPlayerEscape = player.EscapeChance();
+
+            if (WillPlayerEscape == true)
+            {
+                Console.WriteLine("You have escaped!");
+                monster.Health = 0;
+                Thread.Sleep(2000);
+                return true;
+            }
+            else
+            {
+                int PenaltyDamage = random.Next(1, monster.Strength);
+                player.Health -= PenaltyDamage;
+                int FinalCalculation = PlayersOriginalHealth -= player.Health;
+                Console.WriteLine($"The {monster.monstertype} managed to stop you from escaping and dealt {FinalCalculation} damage to you! You now have {player.Health} health left.");
+                return false;
+            }
+        }
     }
 
     public enum MonsterType
@@ -178,9 +257,9 @@ class Program
         public int Strength { get; set; } = 0;
         public int Defense { get; set; } = 0;
 
-        public Monster GenerateMonster()
+        public Monster GenerateMonster(Monster monster)
         {
-            Monster monster = new Monster();
+            //Monster monster = new Monster();
             Random rand = new Random();
             Array monsterArray = Enum.GetValues(typeof(MonsterType));
 
@@ -201,6 +280,27 @@ class Program
             Console.WriteLine($"Monsters strength is {Strength}");
             Thread.Sleep(1000);
             Console.WriteLine($"Monsters defense is {Defense}");
+        }
+
+        public void MonsterAttack(Monster monster, Player player)
+        {
+            int PlayersOriginalHealth = player.Health;
+
+            int DamageTaken = player.Defense - monster.Strength;
+
+            if (DamageTaken < 0)
+            {
+                player.Health += DamageTaken;
+                int FinalCalculation = PlayersOriginalHealth -= player.Health;
+
+                Console.WriteLine($"The {monster.monstertype} has chosen to attack and has dealt {FinalCalculation} damage to you.");
+                Console.WriteLine($"Your health is at {player.Health} points!");
+                Thread.Sleep(3000);
+            }
+            else
+            {
+                Console.WriteLine($"The {monster.monstertype} tried to attack you but it was ineffective, and you took no damage.");
+            }
         }
     }
 
@@ -224,7 +324,7 @@ class Program
             return (PotionType)PotionArray.GetValue(rand.Next(PotionArray.Length));
         }
 
-        public bool PotionDrop()
+        public bool PotionDropChance()
         {
             Random random = new Random();
             int WillPotionDrop = random.Next(1, 100);
@@ -238,11 +338,58 @@ class Program
                 return false;
             }
         }
+
+        public void PotionsDrop(Player player, Monster monster)
+        {
+            Potions potion = new Potions();
+            bool DoesPotionDrop = potion.PotionDropChance();
+            if (DoesPotionDrop == true)
+            {
+                var DroppedPotion = potion.GeneratePotion();
+                player.AddItem(DroppedPotion.ToString(), "Potion");
+                Console.WriteLine($"The {monster.monstertype} dropped a potion if {potion.potionType}! It has been added to your inventory.");
+            }
+            else
+            {
+                Console.WriteLine($"The {monster.monstertype} did not drop anything.");
+            }
+        }
+
+        public void UsePotion(Player player)
+        {
+            if (player.playerInventory != null)
+            {
+                foreach (var item in player.playerInventory)
+                {
+                    Console.WriteLine($"{item.Id} - {item.ItemName}");
+                }
+
+                Console.WriteLine("Which potion do you want to use?");
+                int ChosenItem = 0;
+                ChosenItem = int.Parse(Console.ReadLine());
+
+                while (ChosenItem > 0 && ChosenItem > player.playerInventory.Count)
+                {
+                    string NameOfItem = player.playerInventory.FirstOrDefault(x => x.Id == ChosenItem).ItemName;
+                    Console.WriteLine($"You have chosen to use the {NameOfItem} potion");
+                    Thread.Sleep(1000);
+                    player.UseItem(ChosenItem);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Your inventory is empty!");
+            }
+        }
     }
 
     static void Main(string[] args)
     {
-        Player player = new Player();
+        Player player = new();
+        Random random = new();
+        Potions potions = new();
+        Monster monster = new();
+
 
         int Rounds = 1;
 
@@ -253,7 +400,7 @@ class Program
 
             if (!string.IsNullOrWhiteSpace(playersname))
             {
-                player.CreatePlayer(playersname);
+                player.SetPlayerName(playersname);
 
                 while (true)
                 {
@@ -263,199 +410,107 @@ class Program
 
                     if (playersclass == "rogue" || playersclass == "knight" || playersclass == "archer")
                     {
-                        switch (playersclass)
-                        {
-                            case "rogue":
-                                player.SetSpeciality(Speciality.Rogue);
-                                break;
-                            case "knight":
-                                player.SetSpeciality(Speciality.Knight);
-                                break;
-                            case "archer":
-                                player.SetSpeciality(Speciality.Archer);
-                                break;
-                            default:
-                                Console.WriteLine("Invalid input, please try again!");
-                                break;
-                        }
+                        player.ChooseClass(player, playersclass);
 
                         while (Rounds < 11)
                         {
                             Console.Clear();
 
-                            Monster monster = new Monster().GenerateMonster();
-
                             Console.WriteLine($"GET READY! - Round {Rounds}");
                             Thread.Sleep(1000);
-                            monster.GenerateMonster();
+                            monster.GenerateMonster(monster);
 
                             Console.WriteLine("A monster appears!");
                             Thread.Sleep(1000);
 
                             monster.MonsterStats();
 
-                            while (monster.Health > 0 || player.Health > 0)
+                            while (monster.Health > 0 && player.Health > 0)
                             {
-
                                 Console.WriteLine("What do you do? 'Run', 'Attack', or 'UsePotion'?");
                                 var FightInput = Console.ReadLine().ToLower();
 
-                                if (FightInput == "run")
+                                if (FightInput == "run" || FightInput == "usepotion" || FightInput == "attack")
                                 {
-                                    bool WillPlayerEscape = player.EscapeChance();
-
-                                    if (WillPlayerEscape == true)
+                                    if (FightInput == "run")
                                     {
-                                        Console.WriteLine("You have escaped!");
-                                        monster.Health = 0;
-                                        Thread.Sleep(2000);
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        Random rando = new Random();
+                                        bool Outcome = player.PlayerRun(player, monster);
 
-                                        int DamageDealt = rando.Next(1, 5);
-
-                                        int Shield = DamageDealt -= player.Defense;
-
-                                        if (Shield > 0)
+                                        if (Outcome)
                                         {
-                                            Console.WriteLine($"The {monster.monstertype} managed to stop you from escaping and dealt {Shield} damage to you.");
-                                            player.Health -= Shield;
+                                            break;
                                         }
                                         else
                                         {
-                                            Console.WriteLine("The attack was ineffective, and no damage was taken.");
+                                            continue;
                                         }
                                     }
-                                }
-                                else if (FightInput == "attack")
-                                {
-                                    int MonstersOriginalHealth = monster.Health;
-
-                                    bool DidPlayerDamageTarget = player.AttackChance();
-
-                                    if (DidPlayerDamageTarget == true)
+                                    else if (FightInput == "attack")
                                     {
-                                        int DamageGiven = monster.Defense - player.Strength;
+                                        player.PlayerAttack(player, monster);
+                                    }
+                                    else if (FightInput == "usepotion")
+                                    {
+                                        potions.UsePotion(player);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Unknown command! Please try again!");
+                                    }
 
-                                        if (DamageGiven < 0)
+
+                                    if (monster.Health > 0)
+                                    {
+                                        monster.MonsterAttack(monster, player);
+                                    }
+                                    else
+                                    {
+                                        if (monster.Health < 1)
                                         {
-                                            monster.Health += DamageGiven;
-
-                                            int FinalCalculation = MonstersOriginalHealth -= monster.Health;
-
-                                            Console.WriteLine($"You dealt the {monster.monstertype} {FinalCalculation} damage and is now at {monster.Health} health.");
-
+                                            Console.Clear();
+                                            Console.WriteLine($"The {monster.monstertype} was slain!!!");
                                             Thread.Sleep(2000);
+                                            break;
                                         }
                                         else
                                         {
-                                            Console.WriteLine("The attack was ineffective, and no damage was inflicted.");
+                                            continue;
                                         }
                                     }
-                                    else
+
+                                    if (player.Health < 1)
                                     {
-                                        Console.WriteLine("You missed!");
-                                    }
-                                }
-                                else if (FightInput == "usepotion")
-                                {
-                                    if (player.playerInventory.Count != 0)
-                                    {
-                                        foreach (var item in player.playerInventory)
-                                        {
-                                            Console.WriteLine($"{item.Id} - {item.ItemName}");
-                                        }
-
-                                        Console.WriteLine("Which potion do you want to use?");
-                                        int ChosenItem = 0;
-
-                                        ChosenItem = int.Parse(Console.ReadLine());
-
-                                        while (ChosenItem > 0 && ChosenItem > player.playerInventory.Count)
-                                        {
-                                            string NameOfItem = player.playerInventory.Where(x => x.Id == ChosenItem).FirstOrDefault().ItemName;
-                                            Console.WriteLine($"You have chosen to use the {NameOfItem} potion");
-                                            Thread.Sleep(1000);
-                                            player.UseItem(ChosenItem);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Your inventory is empty!");
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Unknown command! Please try again!");
-                                }
-
-                                if (monster.Health > 0)
-                                {
-
-                                    int PlayersOriginalHealth = player.Health;
-
-                                    int DamageTaken = player.Defense - monster.Strength;
-
-                                    if (DamageTaken < 0)
-                                    {
-                                        player.Health += DamageTaken;
-                                        int FinalCalculation = PlayersOriginalHealth -= player.Health;
-
-                                        Console.WriteLine($"The {monster.monstertype} has chosen to attack and has dealt {FinalCalculation} damage to you.");
-                                        Console.WriteLine($"Your health is at {player.Health} points!");
+                                        Console.Clear();
+                                        Console.WriteLine("YOU DIED!");
                                         Thread.Sleep(3000);
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine($"The {monster.monstertype} tried to attack you but it was ineffective, and you took no damage.");
-                                    }
-
-                                    if (player.Health <= 0)
-                                    {
                                         break;
                                     }
+                                    else
+                                    {
+                                        continue;
+                                    }
 
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"The {monster.monstertype} was slain!!!");
-                                    Thread.Sleep(2000);
-                                    break;
+
                                 }
                             }
-
 
                             Console.Clear();
-                            Thread.Sleep(1000);
+                            //Thread.Sleep(1000);
 
-                            if (player.Health <= 0)
+                            if (Rounds < 10)
                             {
-                                Console.WriteLine("YOU DIED!");
-                                break;
-                            }
-                            else if (monster.Health <= 0)
-                            {
-                                if (Rounds < 10)
+                                if (player.Health < 1)
+                                {
+                                    break;
+                                }
+                                else if (monster.Health < 1)
                                 {
                                     Console.WriteLine($"Ready for round {Rounds + 1}? Type 'yes' to continue.");
 
                                     var input = Console.ReadLine().ToLower();
                                     if (input == "yes")
                                     {
-                                        Potions potion = new Potions();
-                                        bool DoesPotionDrop = potion.PotionDrop();
-                                        if (DoesPotionDrop == true)
-                                        {
-                                            var DroppedPotion = potion.GeneratePotion();
-                                            Console.WriteLine($"The {monster.monstertype} dropped a potion if {potion.potionType}! It has been added to your inventory.");
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine($"The {monster.monstertype} did not drop anything.");
-                                        }
+                                        potions.PotionsDrop(player, monster);
                                         Rounds++;
                                     }
                                     else
@@ -468,33 +523,6 @@ class Program
                                 else
                                 {
                                     Console.WriteLine("Congratulations! You have completed the game, until we meet again warrior!");
-                                    Thread.Sleep(2000);
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Ready for round {Rounds + 1}? Type 'yes' to continue.");
-
-                                var input = Console.ReadLine().ToLower();
-                                if (input == "yes")
-                                {
-                                    Potions potion = new Potions();
-                                    bool DoesPotionDrop = potion.PotionDrop();
-                                    if (DoesPotionDrop == true)
-                                    {
-                                        var DroppedPotion = potion.GeneratePotion();
-                                        Console.WriteLine($"The {monster.monstertype} dropped a potion if {potion.potionType}! It has been added to your inventory.");
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine($"The {monster.monstertype} did not drop anything.");
-                                    }
-                                    Rounds++;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Goodbye!");
                                     Thread.Sleep(2000);
                                     break;
                                 }
